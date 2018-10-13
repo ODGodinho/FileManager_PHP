@@ -14,6 +14,7 @@ require_once("./vendor/FileManager_PHP/src/autoload.php");
 use FileConfiguration\PropertiesConfiguration;
 use FileManipulation\Exceptions\FileManipulationExceptions;
 ```
+
 3º Não requer composer.
 
 # Exemplos
@@ -34,7 +35,7 @@ try {
 
 ---
 
-_Properties Exemplo:_
+##### _Properties Exemplo:_
 
 ```ini
 snooper-enabled=false
@@ -47,7 +48,7 @@ network-compression-threshold=1030
 
 ---
 
-_Get and Setters Configurações:_
+##### _Get and Setters Configurações:_
 
 ```php
 ...
@@ -60,18 +61,18 @@ $Config->saveConfig(); // Salva as modificações feitas no arquivo
 
 ---
 
-_reload Config:_
+##### _reload Config:_
 
 ```php
 ...
 $Config->loadConfig();
 ```
 
-##### (As alterações feitas não salvas são perdidas é substituídas)
+_(As alterações feitas não salvas são perdidas é substituídas)_
 
 ---
 
-_Salva as Modificações:_
+##### _Salva as Modificações:_
 
 ```php
 $file->saveConfig(); // Salva no arquivo atual
@@ -80,7 +81,7 @@ $file->saveConfig("./Properties/EnvFile.env"); // Salva em um novo arquivo
 
 ---
 
-_Load $\_ENV e getenv():_
+##### _Load $\_ENV e getenv():_
 
 ```php
 $Config->loadEnv();
@@ -106,7 +107,7 @@ try {
 }
 ```
 
-_Default:_
+##### _Default:_
 
 ```php
 /**
@@ -121,9 +122,11 @@ _Default:_
 new CSVConfiguration("./CSV/Exemplos.csv", true, "auto", 0, null, true);
 ```
 
-##### _(Instancia padrão da classe) - Configure como preferir_
+_(Instancia padrão da classe) - Configure como preferir_
 
-_CSV Exemplo:_
+---
+
+##### _CSV Exemplo:_
 
 ```text
 id,nome,telefone,email
@@ -141,7 +144,7 @@ id,nome,telefone,email
 
 ---
 
-_Rode as configurações:_
+##### _Rode as configurações:_
 
 ```php
 ...
@@ -172,11 +175,11 @@ while ($reg = $file->getData()) {
 ];
 ```
 
-##### _OBS: se o useHeader for desabilitado ele não ira pular a primeira linha então o primeiro registro seria (id,nome,telefone,email);_
+_OBS: se o useHeader for desabilitado ele não ira pular a primeira linha então o primeiro registro seria (id,nome,telefone,email);_
 
 ---
 
-_Get and Setters Configurações:_
+##### _Get and Setters Configurações:_
 
 ```php
 while ($reg = $file->getData()) {
@@ -190,11 +193,11 @@ while ($reg = $file->getData()) {
 }
 ```
 
-##### _Não use: ~~$reg['nome'] = "Heloisa"~~; <br /> Recupere uma configuração pelo nome ou indice_
+_Não use: ~~$reg['nome'] = "Heloisa"~~; <br /> Recupere uma configuração pelo nome ou indice_
 
 ---
 
-_Salva as Modificações:_
+##### _Salva as Modificações:_
 
 ```php
 $file->saveConfig(); // Salva no arquivo atual
@@ -203,7 +206,7 @@ $file->saveConfig("./CSV/NewCSV.csv"); // Salva em um novo arquivo
 
 ---
 
-_Pula para uma linha especifica:_
+##### _Pula para uma linha especifica:_
 
 ```php
 $reg = $file->setData(5); // Começa na 5º posição
@@ -212,11 +215,11 @@ $reg = $file->resetData(); // Volta para a primeira posição
 $reg = $file->endData(); // Vai para a ultima posição
 ```
 
-##### _Se o userHeader for verdadeiro retornara o usuario ID 15, se não resgatara o id 14_
+_Se o userHeader for verdadeiro retornara o usuario ID 15, se não resgatara o id 14_
 
 ---
 
-_get header:_
+##### _get header:_
 
 ```php
 $header = $file->getHeader();
@@ -229,11 +232,11 @@ $header = $file->getHeader();
 ];
 ```
 
-##### _Se o useHeader for falso retornara nulo (null);_
+_Se o useHeader for falso retornara nulo (null);_
 
 ---
 
-_Manipular arquivos:_
+##### _Manipular arquivos:_
 
 ```php
 $file->setDelimitador(","); // Muda o Delimitador do Arquivo
@@ -241,17 +244,17 @@ $file->setStartLine(-5); // Começara no usario de ID 15
 $file->setLimitLine(2); // Limite de usuarios carregados
 ```
 
-##### _Requer: $file->loadConfig(); para recarregar as posições. <br /> Requer: $file->saveConfig(); para atualizar o delimitador._
+_Requer: $file->loadConfig(); para recarregar as posições. <br /> Requer: $file->saveConfig(); para atualizar o delimitador._
 
 ---
 
-_Recarrega as Configurações:_
+##### _Recarrega as Configurações:_
 
 ```php
 $file->loadConfig(); // Limpa as modificações feitas
 ```
 
-##### _Todas as modificações não salvas são perdidas_;
+_Todas as modificações não salvas são perdidas_;
 
 # Tratando Erros:
 
@@ -274,7 +277,7 @@ $file->loadConfig(); // Limpa as modificações feitas
 
 ---
 
-**Codigos**
+### **Codigos**
 
 1. O Arquivo e Null (Nulo)
 2. O Arquivo não existe, corrija com:
