@@ -2,7 +2,7 @@
 
 namespace FileConfiguration;
 
-use FileManipulation\Exceptions\FileLoadException;
+use FileManipulation\Exceptions\FileManipulationExceptions;
 use FileManipulation\FileManipulation;
 /**
  * Manipular arquivos .env e .properties
@@ -42,7 +42,7 @@ class PropertiesConfiguration extends FileManipulation
    *
    * Caso você execulte essa função mais de 1 vez ele ira restaurar todas as
    * configurações originais do arquivo 
-   * @return void
+   * @return array
    */
   public function loadConfig()
   {
@@ -82,12 +82,12 @@ class PropertiesConfiguration extends FileManipulation
    *
    * @param string $key Nome da Configuração
    * @param string $value Valor da Configuração
-   * @return array
+   * @return self
    */
   public function setValue($key, $value)
   {
     $this->configuration[$key] = $value;
-    return $this->configuration;
+    return $this;
   }
 
   /**
@@ -96,42 +96,47 @@ class PropertiesConfiguration extends FileManipulation
    * Todas as Alterações serão salvas no arquivo
    * para serem manipuladas novamente futuramente
    *
-   * @return self
-   * @throws conditon
+   * @throws FileManipulationExceptions Caso não tenha permissão para gravar no disco
    **/
-  public function saveConfig()
+  public function saveConfig($newFile = null)
   {
     $saveFile = "";
     foreach ($this->getAllConfigurations() as $key => $value) {
-      if (!$this->isComments($value))
+      if (!$this->isComments($value)) {
         $saveFile .= "{$key}={$value}\r\n";
-      else
-        $saveFile .= "{$value}\r\n";
+        continue;
+      }
+      $saveFile .= "{$value}\r\n";
     }
-    if (!is_writable($this->fileLocation))
-      throw new FileLoadException("FileManager : Não foi possivel modificar '{$this->fileLocation}' (NOT PERMISSION).", 6);
 
-    file_put_contents($this->fileLocation, $saveFile);
+    $backupCurrentFile = $this->getFileLocation(); // Salva o arquivo original
+    $this->setFileLocation($newFile); 
+
+    file_put_contents($this->getFileLocation(), $saveFile);
+    $this->setFileLocation($backupCurrentFile); // restaura o arquivo original para file location
   }
 
   /**
    * Verifica se a seguinte linha e uma configuração valida
    *
-   * @param string $line
-   * Linha a ser verificada
-   *
+   * @param string $line Linha a ser verificada
    * @return boolean
    */
   private function _lineConfigSyntax($linha = null, $key = -1)
   {
     /* Verifica se e uma linha valida */
     if (!strpos($linha, "=")) {
-      throw new FileLoadException(sprintf(self::SYNTAX_ERROR, $key + 1), 5);
+      throw new FileManipulationExceptions(sprintf(self::SYNTAX_ERROR_MESSAGE, $key + 1), self::SYNTAX_ERROR_CODE);
     }
 
     return true;
   }
 
+  /**
+   * Carrega todas as Configurações em $_ENV e getenv()
+   *
+   * @return array
+   */
   public function loadEnv()
   {
     foreach ($this->configuration as $key => $value) {
@@ -145,5 +150,6 @@ class PropertiesConfiguration extends FileManipulation
         }
       }
     }
+    return $_ENV;
   }
 }

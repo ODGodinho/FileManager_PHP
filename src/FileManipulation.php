@@ -2,25 +2,20 @@
 
 namespace FileManipulation;
 
-use FileManipulation\Exceptions\FileLoadException;
+use FileManipulation\Exceptions\ExceptionsCode;
 
 /**
  * Interface para manipulação de arquivos
  */
-abstract class FileManipulation
+abstract class FileManipulation extends ExceptionsCode
 {
-  const IS_NULL_MESSAGE = "FileManager : O Arquivo é nulo.";
-  const NOT_EXIST_MESSAGE = "FileManager : O arquivo '%s' não existe.";
-  const NOT_PERM_WRITE = "FileManager : Não foi possivel criar o arquivo '%s' (NOT PERMISSION).";
-  const NOT_FILE = "FileManager : '%s' não é um arquivo.";
-  const NOT_PERM_READ = "FileManager : Não foi possivel ler '%s' (NOT PERMISSION).";
-  const SYNTAX_ERROR = "FileManager : Erro de syntax proximo da linha %s.";
+
   /**
    * Cotem o local do arquivo a ser manipulado
    * 
    * @var string $fileLocation
    */
-  protected $fileLocation;
+  private $fileLocation;
   /**
    * Configurações do arquivo apos ser carregada para a memoria
    *
@@ -47,28 +42,45 @@ abstract class FileManipulation
     $this->SyntaxErrorException = $SyntaxErrorException;
     $this->checkFile($createFile);
   }
+
   /**
    * Verifica se o caminho informado 
    * Existe, se é um arquivo, se ele pode ser lido
    *
    * @return boolean
    */
-  public function checkFile($createFile)
+  protected function checkFile($createFile)
   {
     $w = is_writable($this->fileLocation);
 
     if ($this->fileLocation == null)
-      throw new FileLoadException(sprintf(self::IS_NULL_MESSAGE, $this->fileLocation), 1);
+      throw new FileLoadException(sprintf(self::IS_NULL_MESSAGE, $this->fileLocation), self::IS_NULL_CODE);
+
     if (!file_exists($this->fileLocation) && !$createFile)
-      throw new FileLoadException(sprintf(self::NOT_EXIST_MESSAGE, $this->fileLocation), 2);
-    if (!file_exists($this->fileLocation) && $createFile)
+      throw new FileLoadException(sprintf(self::NOT_EXIST_MESSAGE, $this->fileLocation), self::NOT_EXIST_CODE);
+
+
+    if (!file_exists($this->fileLocation) && $createFile) {
+      // REMOVE FILE NAME ao criar as pastas
+      $folder = explode("/", $this->fileLocation);
+      array_pop($folder);
+
+      // Se existir pasta a ser criada entao crie
+      if (count($folder) > 0) {
+        @mkdir(implode(DIRECTORY_SEPARATOR, $folder), 0777, true);
+      }
       @fopen($this->fileLocation, "w");
+    }
+
     if (!file_exists($this->fileLocation) && $createFile)
-      throw new FileLoadException(sprintf(self::NOT_PERM_WRITE, $this->fileLocation), 6);
+      throw new FileLoadException(sprintf(self::NOT_CHANGE_MESSAGE, $this->fileLocation), self::NOT_CHANGE_CODE);
+
+
     if (!is_file($this->fileLocation))
-      throw new FileLoadException(sprintf(self::NOT_FILE, $this->fileLocation), 3);
+      throw new FileLoadException(sprintf(self::NOT_FILE_MESSAGE, $this->fileLocation), self::NOT_FILE_CODE);
+
     if (!is_readable($this->fileLocation))
-      throw new FileLoadException(sprintf(self::NOT_PERM_READ, $this->fileLocation), 4);
+      throw new FileLoadException(sprintf(self::NOT_READ_MESSAGE, $this->fileLocation), self::NOT_READ_CODE);
 
     return true;
   }
@@ -87,7 +99,7 @@ abstract class FileManipulation
    *
    * @return string
    */
-  protected function getFileLocation()
+  public function getFileLocation()
   {
     return $this->fileLocation;
   }
@@ -109,10 +121,11 @@ abstract class FileManipulation
   {
     return $this->configuration ? : $this->loadConfig();
   }
+
   /**
    * Deve verificar se a seginte linha e um comentario
    *
-   * @param string $line
+   * @param string $line Linha do arquivo
    * @return boolean
    */
   abstract public function isComments($line);
@@ -135,4 +148,21 @@ abstract class FileManipulation
    * @return self
    */
   abstract public function saveConfig();
+
+  /**
+   * Set $fileLocation
+   *
+   * @param  string  $fileLocation Novo local do arquivo
+   * @return  self
+   */ 
+  public function setFileLocation($fileLocation = null)
+  {
+    if (!is_null($fileLocation)) {
+      $this->fileLocation = $fileLocation;
+      $this->checkFile(true);
+    }
+
+    return $this;
+  }
+
 }
